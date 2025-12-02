@@ -7,7 +7,6 @@
 ![Status](https://img.shields.io/badge/Status-On_Progress-green?style=for-the-badge)
 
 > **Tugas Besar Mata Kuliah Struktur Data**
-> Program aplikasi berbasis **CLI** untuk mensimulasikan sistem lelang barang secara terstruktur dan interaktif.
 
 ---
 
