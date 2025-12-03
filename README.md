@@ -20,15 +20,15 @@
 
 ---
 
-💬 Hasil Diskusi Kelompok
-1. Sistem menggunakan Graph untuk memetakan semua lokasi transportasi dan jalurnya.
-2. Setiap lokasi (halte/stasiun) dibuat sebagai node graph.
-3. Hubungan antar lokasi (jalur transportasi) dibuat sebagai edge graph.
-4. Semua jadwal keberangkatan dan kedatangan dikelola menggunakan BST.
-5. Setiap jadwal disimpan sebagai node BST yang memiliki atribut waktu, rute, ID kendaraan, dan durasi.
-6. Pencarian jadwal dibuat cepat menggunakan operasi find() pada BST.
-7. In‑order traversal BST digunakan untuk menampilkan jadwal secara terurut dari paling pagi → paling malam.
-8. Sistem dapat menampilkan rute perjalanan dengan graph lalu menampilkan jadwal kendaraan yang tersedia melalui BST.
+## 💬 Hasil Diskusi Kelompok
+1. Sistem ini menggunakan Graph untuk memetakan semua lokasi transportasi dan jalurnya.
+2. Setiap lokasi (halte/stasiun) dibuat peran sebagai node graph.
+3. Hubungan antar lokasi (jalur transportasi) dibuat peran sebagai edge graph.
+4. Semua jadwal keberangkatan dan kedatangan dikelola menggunakan Binary Search Tree.
+5. Setiap jadwal disimpan sebagai node Binary Search Tree yang memiliki atribut waktu, rute, ID kendaraan, dan durasi.
+6. Pencarian jadwal ini dibuat cepat menggunakan operasi find() pada Binary Search Tree.
+7. In‑order traversal Binary Search Tree digunakan untuk menampilkan jadwal secara terurut dan efisien dari pagi hingga malam.
+8. Sistem dapat menampilkan rute perjalanan dengan graph lalu menampilkan jadwal kendaraan yang tersedia melalui Binary Search Tree.
 9. Data yang dapat disimulasikan: penambahan rute, penambahan jadwal, penghapusan jadwal, dan pencarian jadwal.
 
 ---
