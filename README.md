@@ -21,7 +21,9 @@
 ---
 
 📃 Deskripsi TUBES
+
 Sistem ini akan berlatar pada pengelolaan transportasi (bus, kereta, atau shuttle kampus) yang beroperasi di dalam suatu jaringan halte atau stasiun. Sistem ini berfungsi sebagai aplikasi pengatur rute dan jadwal perjalanan yang dapat digunakan untuk membantu pengguna menemukan rute terbaik serta jadwal keberangkatan yang tersedia. Sistem ini memiliki mekanik seperti pemilihan rute, pencarian jadwal terdekat, serta pemrosesan data transportasi secara otomatis menggunakan struktur data yang sesuai.
+
 Sistem ini menggunakan algoritma Graph dan Binary Search Tree (BST) dalam pengolahan data transportasi.
 Graph digunakan untuk memetakan hubungan antar halte/stasiun, jalur perjalanan, serta menentukan rute yang dapat dilalui pengguna berdasarkan koneksi antar lokasi. Setiap node merepresentasikan halte/stasiun dan setiap edge merupakan jalur penghubung di antara keduanya.
 Sedangkan Binary Search Tree digunakan dalam penyimpanan dan pengelolaan jadwal keberangkatan. Setiap jadwal memiliki nilai kunci berupa waktu keberangkatan atau ID rute, sehingga BST memungkinkan sistem melakukan pencarian jadwal dengan cepat, mengurutkan jadwal secara otomatis, serta menambahkan atau menghapus jadwal sesuai kebutuhan pengguna.
