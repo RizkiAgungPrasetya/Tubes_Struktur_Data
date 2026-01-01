@@ -3,26 +3,33 @@
 #include <sstream>
 #include <functional>
 
+/* ===== BST ===== */
 void createBST(BSTSchedule &T) {
     T.root = NULL;
 }
 
-addressSchedule createNode(int time, int bus, string dest,
-                           string halte[], int count) {
+addressSchedule createNode(int time, int bus, string depart,
+                           string dest, string halte[], int count) {
     addressSchedule P = new ScheduleNode;
     P->time = time;
     P->busNumber = bus;
+    P->departureTime = depart;
     P->destination = dest;
     P->halteCount = count;
+
     for (int i = 0; i < count; i++)
         P->halteList[i] = halte[i];
+
     P->left = P->right = NULL;
     return P;
 }
 
 void insertSchedule(BSTSchedule &T, int time, int bus,
-                    string dest, string halte[], int count) {
-    addressSchedule baru = createNode(time, bus, dest, halte, count);
+                    string depart, string dest,
+                    string halte[], int count) {
+
+    addressSchedule baru = createNode(time, bus, depart, dest, halte, count);
+
     if (T.root == NULL) {
         T.root = baru;
         return;
@@ -46,15 +53,19 @@ void insertSchedule(BSTSchedule &T, int time, int bus,
 void inorderSchedule(addressSchedule P) {
     if (P != NULL) {
         inorderSchedule(P->left);
-        cout << "Bus " << P->busNumber
-             << " | Waktu: " << P->time
-             << " | Tujuan: " << P->destination << endl;
-        cout << "Rute: ";
+
+        cout << "Bus " << P->busNumber << endl;
+        cout << "Jam Berangkat : " << P->departureTime << endl;
+        cout << "Waktu         : " << P->time << endl;
+        cout << "Tujuan        : " << P->destination << endl;
+        cout << "Rute          : ";
+
         for (int i = 0; i < P->halteCount; i++) {
             cout << P->halteList[i];
             if (i < P->halteCount - 1) cout << " -> ";
         }
         cout << "\n\n";
+
         inorderSchedule(P->right);
     }
 }
@@ -64,15 +75,45 @@ void searchSchedule(addressSchedule P, int time) {
         cout << "Jadwal tidak ditemukan!\n";
         return;
     }
-    if (P->time == time)
-        cout << "Bus " << P->busNumber << " | Waktu: " << P->time
-             << " | Tujuan: " << P->destination << endl;
+
+    if (P->time == time) {
+        cout << "Bus " << P->busNumber << endl;
+        cout << "Jam Berangkat : " << P->departureTime << endl;
+        cout << "Tujuan        : " << P->destination << endl;
+    }
     else if (time < P->time)
         searchSchedule(P->left, time);
     else
         searchSchedule(P->right, time);
 }
 
+/* ===== CARI BERDASARKAN HALTE ===== */
+void searchScheduleByHalte(addressSchedule P, string halteCari) {
+    if (P == NULL) return;
+
+    searchScheduleByHalte(P->left, halteCari);
+
+    for (int i = 0; i < P->halteCount; i++) {
+        if (P->halteList[i] == halteCari) {
+            cout << "Bus " << P->busNumber << endl;
+            cout << "Jam Berangkat : " << P->departureTime << endl;
+            cout << "Waktu         : " << P->time << endl;
+            cout << "Tujuan        : " << P->destination << endl;
+            cout << "Rute          : ";
+
+            for (int j = 0; j < P->halteCount; j++) {
+                cout << P->halteList[j];
+                if (j < P->halteCount - 1) cout << " -> ";
+            }
+            cout << "\n\n";
+            break;
+        }
+    }
+
+    searchScheduleByHalte(P->right, halteCari);
+}
+
+/* ===== DELETE ===== */
 addressSchedule findMin(addressSchedule node) {
     while (node->left != NULL)
         node = node->left;
@@ -97,56 +138,66 @@ addressSchedule deleteSchedule(addressSchedule root, int time) {
             delete root;
             return temp;
         }
+
         addressSchedule temp = findMin(root->right);
         root->time = temp->time;
         root->busNumber = temp->busNumber;
+        root->departureTime = temp->departureTime;
         root->destination = temp->destination;
         root->halteCount = temp->halteCount;
+
         for (int i = 0; i < temp->halteCount; i++)
             root->halteList[i] = temp->halteList[i];
+
         root->right = deleteSchedule(root->right, temp->time);
     }
     return root;
 }
 
+/* ===== FILE ===== */
 void saveScheduleToFile(BSTSchedule T) {
     ofstream file("jadwal.txt");
+
     function<void(addressSchedule)> save =
     [&](addressSchedule P) {
         if (P != NULL) {
             save(P->left);
             file << P->time << "|"
                  << P->busNumber << "|"
+                 << P->departureTime << "|"
                  << P->destination << "|"
                  << P->halteCount << "|";
+
             for (int i = 0; i < P->halteCount; i++)
                 file << P->halteList[i] << "|";
+
             file << endl;
             save(P->right);
         }
     };
+
     save(T.root);
     file.close();
 }
 
 void loadScheduleFromFile(BSTSchedule &T) {
     ifstream file("jadwal.txt");
-    string line, temp, dest, halte[MAX_NODE];
+    string line, temp, dest, depart, halte[MAX_NODE];
     int time, bus, count;
 
     while (getline(file, line)) {
         stringstream ss(line);
+
         getline(ss, temp, '|'); time = stoi(temp);
         getline(ss, temp, '|'); bus = stoi(temp);
+        getline(ss, depart, '|');
         getline(ss, dest, '|');
         getline(ss, temp, '|'); count = stoi(temp);
+
         for (int i = 0; i < count; i++)
             getline(ss, halte[i], '|');
-        insertSchedule(T, time, bus, dest, halte, count);
+
+        insertSchedule(T, time, bus, depart, dest, halte, count);
     }
     file.close();
-}
-
-void createGraph(Graph &G, int jumlahNode) {
-    G.V = jumlahNode;
 }

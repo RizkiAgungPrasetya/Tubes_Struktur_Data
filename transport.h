@@ -11,6 +11,13 @@ typedef struct ScheduleNode *addressSchedule;
 struct ScheduleNode {
     int time;
     int busNumber;
+/* ===== BST ===== */
+typedef struct ScheduleNode *addressSchedule;
+
+struct ScheduleNode {
+    int time;                    // key BST
+    int busNumber;
+    string departureTime;        // JAM KEBERANGKATAN
     string destination;
     int halteCount;
     string halteList[MAX_NODE];
@@ -21,6 +28,7 @@ struct ScheduleNode {
 struct BSTSchedule {
     addressSchedule root;
 };
+
 
 struct Graph {
     int V;
@@ -34,11 +42,29 @@ void insertSchedule(BSTSchedule &T, int time, int bus,
                     string dest, string halte[], int count);
 void inorderSchedule(addressSchedule P);
 void searchSchedule(addressSchedule P, int time);
+
+/* ===== FUNCTION ===== */
+void createBST(BSTSchedule &T);
+
+addressSchedule createNode(int time, int bus, string depart,
+                           string dest, string halte[], int count);
+
+void insertSchedule(BSTSchedule &T, int time, int bus,
+                    string depart, string dest,
+                    string halte[], int count);
+
+void inorderSchedule(addressSchedule P);
+void searchSchedule(addressSchedule P, int time);
+void searchScheduleByHalte(addressSchedule P, string halteCari);
+
 addressSchedule deleteSchedule(addressSchedule root, int time);
 
 void saveScheduleToFile(BSTSchedule T);
 void loadScheduleFromFile(BSTSchedule &T);
 
+
 void createGraph(Graph &G, int jumlahNode);
+
+#endif
 
 #endif
