@@ -1,236 +1,167 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include "transport.h"
-using namespace std;
+#include <fstream>
 
-/* ===== LINKED LIST CUSTOMER ===== */
-struct CustomerNode {
-    string username;
-    string password;
-    CustomerNode *next;
-};
+bool registerCustomer(string u, string p) {
+    ifstream in("customer.txt");
+    string user, pass;
+    while (in >> user >> pass)
+        if (user == u) return false;
+    in.close();
 
-CustomerNode *headCustomer = NULL;
+    ofstream out("customer.txt", ios::app);
+    out << u << " " << p << endl;
+    out.close();
+    return true;
+}
 
-/* ===== DATABASE CUSTOMER ===== */
-bool isCustomerExist(string username) {
-    ifstream file("customer.txt");
-    string line, u, p;
-
-    while (getline(file, line)) {
-        stringstream ss(line);
-        getline(ss, u, '|');
-        getline(ss, p, '|');
-        if (u == username) {
-            file.close();
-            return true;
-        }
-    }
-    file.close();
+bool loginCustomer(string u, string p) {
+    ifstream in("customer.txt");
+    string user, pass;
+    while (in >> user >> pass)
+        if (user == u && pass == p) return true;
+    in.close();
     return false;
 }
 
-void saveCustomerToFile(string username, string password) {
-    ofstream file("customer.txt", ios::app);
-    file << username << "|" << password << endl;
-    file.close();
-}
-
-void loadCustomerFromFile() {
-    ifstream file("customer.txt");
-    string line, u, p;
-
-    while (getline(file, line)) {
-        stringstream ss(line);
-        getline(ss, u, '|');
-        getline(ss, p, '|');
-
-        CustomerNode *baru = new CustomerNode;
-        baru->username = u;
-        baru->password = p;
-        baru->next = headCustomer;
-        headCustomer = baru;
-    }
-    file.close();
-}
-
-/* ===== LOGIN ===== */
-bool loginAdmin() {
-    string u, p;
-    cout << "Username: "; cin >> u;
-    cout << "Password: "; cin >> p;
-    return (u == "admin" && p == "admin123");
-}
-
-bool loginCustomer() {
-    string u, p;
-    cout << "Username: "; cin >> u;
-    cout << "Password: "; cin >> p;
-
-    CustomerNode *temp = headCustomer;
-    while (temp != NULL) {
-        if (temp->username == u && temp->password == p)
-            return true;
-        temp = temp->next;
-    }
-    cout << "Login gagal!\n";
-    return false;
-}
-
-void registerCustomer() {
-    string username, password;
-    cout << "Username baru: ";
-    cin >> username;
-
-    if (isCustomerExist(username)) {
-        cout << "Username sudah terdaftar!\n";
-        return;
-    }
-
-    cout << "Password baru: ";
-    cin >> password;
-
-    saveCustomerToFile(username, password);
-
-    CustomerNode *baru = new CustomerNode;
-    baru->username = username;
-    baru->password = password;
-    baru->next = headCustomer;
-    headCustomer = baru;
-
-    cout << "Registrasi berhasil!\n";
-}
-
-/* ===== MENU ADMIN (LENGKAP) ===== */
 void menuAdmin(BSTSchedule &jadwal) {
     int pilih;
-    while (true) {
-        cout << "\n=== MENU ADMIN ===\n";
+    do {
+        cout << "\nMENU ADMIN\n";
         cout << "1. Tambah Jadwal\n";
-        cout << "2. Lihat Jadwal\n";
-        cout << "3. Hapus Jadwal\n";
-        cout << "4. Ubah Jadwal\n";
+        cout << "2. Lihat Semua Jadwal\n";
+        cout << "3. Ubah Jadwal\n";
+        cout << "4. Hapus Jadwal\n";
+        cout << "5. Reset Semua Jadwal\n";
         cout << "0. Logout\n";
         cout << "Pilih: ";
         cin >> pilih;
-
-        if (pilih == 0) break;
+        cin.ignore();
 
         if (pilih == 1) {
-            int time, bus, count;
-            string dest, halte[MAX_NODE];
+            int id, bus, travel, count;
+            string depart, dest, halte[MAX_NODE];
+
+            cout << "ID Jadwal: ";
+            cin >> id; cin.ignore();
+            if (isIDExist(jadwal.root, id)) {
+                cout << "ID sudah ada\n";
+                continue;
+            }
 
             cout << "Nomor Bus: ";
-            cin >> bus;
-            cout << "Waktu: ";
-            cin >> time;
-            cin.ignore();
+            cin >> bus; cin.ignore();
+
+            cout << "Jam Keberangkatan (HH:MM): ";
+            getline(cin, depart);
+
+            cout << "Waktu Tempuh (menit): ";
+            cin >> travel; cin.ignore();
 
             cout << "Tujuan: ";
             getline(cin, dest);
 
             cout << "Jumlah Halte: ";
-            cin >> count;
-            cin.ignore();
+            cin >> count; cin.ignore();
 
             for (int i = 0; i < count; i++) {
-                cout << "Nama Halte " << i + 1 << ": ";
+                cout << "Halte ke-" << i + 1 << ": ";
                 getline(cin, halte[i]);
             }
 
-            insertSchedule(jadwal, time, bus, dest, halte, count);
-            saveScheduleToFile(jadwal);
+            insertSchedule(jadwal, id, bus, depart, travel, dest, halte, count);
+            rewriteScheduleFile(jadwal.root);
             cout << "Jadwal ditambahkan\n";
         }
-
         else if (pilih == 2) {
             inorderSchedule(jadwal.root);
         }
-
         else if (pilih == 3) {
-            int t;
-            cout << "Waktu jadwal yang dihapus: ";
-            cin >> t;
+            int id, bus, travel, count;
+            string depart, dest, halte[MAX_NODE];
 
-            jadwal.root = deleteSchedule(jadwal.root, t);
-            saveScheduleToFile(jadwal);
-            cout << "Jadwal dihapus\n";
-        }
+            cout << "ID Jadwal yang diubah: ";
+            cin >> id; cin.ignore();
 
-        else if (pilih == 4) {
-            int lama;
-            cout << "Waktu jadwal lama: ";
-            cin >> lama;
+            if (!isIDExist(jadwal.root, id)) {
+                cout << "ID tidak ditemukan\n";
+                continue;
+            }
 
-            jadwal.root = deleteSchedule(jadwal.root, lama);
+            jadwal.root = deleteSchedule(jadwal.root, id);
 
-            int time, bus, count;
-            string dest, halte[MAX_NODE];
+            cout << "Masukkan data baru\n";
 
-            cout << "\n--- Data Jadwal Baru ---\n";
             cout << "Nomor Bus: ";
-            cin >> bus;
-            cout << "Waktu Baru: ";
-            cin >> time;
-            cin.ignore();
+            cin >> bus; cin.ignore();
+
+            cout << "Jam Keberangkatan (HH:MM): ";
+            getline(cin, depart);
+
+            cout << "Waktu Tempuh (menit): ";
+            cin >> travel; cin.ignore();
 
             cout << "Tujuan: ";
             getline(cin, dest);
 
             cout << "Jumlah Halte: ";
-            cin >> count;
-            cin.ignore();
+            cin >> count; cin.ignore();
 
             for (int i = 0; i < count; i++) {
-                cout << "Nama Halte " << i + 1 << ": ";
+                cout << "Halte ke-" << i + 1 << ": ";
                 getline(cin, halte[i]);
             }
 
-            insertSchedule(jadwal, time, bus, dest, halte, count);
-            saveScheduleToFile(jadwal);
-            cout << "Jadwal diubah\n";
+            insertSchedule(jadwal, id, bus, depart, travel, dest, halte, count);
+            rewriteScheduleFile(jadwal.root);
+            cout << "Jadwal berhasil diubah\n";
         }
-    }
+        else if (pilih == 4) {
+            int id;
+            cout << "ID Jadwal yang dihapus: ";
+            cin >> id;
+            jadwal.root = deleteSchedule(jadwal.root, id);
+            rewriteScheduleFile(jadwal.root);
+            cout << "Jadwal dihapus\n";
+        }
+        else if (pilih == 5) {
+            jadwal.root = NULL;
+            rewriteScheduleFile(jadwal.root);
+            cout << "Semua jadwal direset\n";
+        }
+
+    } while (pilih != 0);
 }
 
-/* ===== MENU CUSTOMER ===== */
 void menuCustomer(BSTSchedule &jadwal) {
     int pilih;
-    while (true) {
-        cout << "\n=== MENU CUSTOMER ===\n";
-        cout << "1. Lihat Jadwal\n";
-        cout << "2. Cari Jadwal\n";
+    do {
+        cout << "\nMENU CUSTOMER\n";
+        cout << "1. Lihat Semua Jadwal\n";
+        cout << "2. Cari Jadwal berdasarkan Halte\n";
         cout << "0. Logout\n";
         cout << "Pilih: ";
         cin >> pilih;
-
-        if (pilih == 0) break;
+        cin.ignore();
 
         if (pilih == 1)
             inorderSchedule(jadwal.root);
         else if (pilih == 2) {
-            int t;
-            cout << "Cari waktu: ";
-            cin >> t;
-            searchSchedule(jadwal.root, t);
+            string halte;
+            cout << "Nama Halte: ";
+            getline(cin, halte);
+            searchScheduleByHalte(jadwal.root, halte);
         }
-    }
+    } while (pilih != 0);
 }
 
-/* ===== MAIN ===== */
 int main() {
     BSTSchedule jadwal;
-    Graph G;
-
-    createBST(jadwal);
-    createGraph(G, 10);
+    initBST(jadwal);
     loadScheduleFromFile(jadwal);
-    loadCustomerFromFile();
 
     int pilih;
-    while (true) {
-        cout << "\n===== SISTEM LOGIN =====\n";
+    do {
+        cout << "\nSISTEM TRANSPORTASI\n";
         cout << "1. Login Admin\n";
         cout << "2. Login Customer\n";
         cout << "3. Registrasi Customer\n";
@@ -238,19 +169,41 @@ int main() {
         cout << "Pilih: ";
         cin >> pilih;
 
-        if (pilih == 0) break;
-
         if (pilih == 1) {
-            if (loginAdmin())
+            string u, p;
+            cout << "Username: ";
+            cin >> u;
+            cout << "Password: ";
+            cin >> p;
+            if (u == "admin" && p == "admin")
                 menuAdmin(jadwal);
+            else
+                cout << "Login admin gagal\n";
         }
         else if (pilih == 2) {
-            if (loginCustomer())
+            string u, p;
+            cout << "Username: ";
+            cin >> u;
+            cout << "Password: ";
+            cin >> p;
+            if (loginCustomer(u, p))
                 menuCustomer(jadwal);
+            else
+                cout << "Login gagal\n";
         }
-        else if (pilih == 3)
-            registerCustomer();
-    }
+        else if (pilih == 3) {
+            string u, p;
+            cout << "Username: ";
+            cin >> u;
+            cout << "Password: ";
+            cin >> p;
+            if (registerCustomer(u, p))
+                cout << "Registrasi berhasil\n";
+            else
+                cout << "Username sudah terdaftar\n";
+        }
+
+    } while (pilih != 0);
 
     return 0;
 }
